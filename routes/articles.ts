@@ -84,15 +84,30 @@ const updateArticle = async (ctx: RouterContext, next: any) => {
 };
 const deleteArticle = async (ctx: RouterContext, next: any) => {
   let id = +ctx.params.id;
+  let article = await model.getById(id);
+  if (article.length) {
+    let result = await model.remove(id);
 
-  if (id <= articles.length && id > 0) {
-    articles.splice(id - 1, 1);
-    ctx.body = {
-      message: `Removed article with id ${id}`,
-    };
+    if (result.status == 200) {
+      ctx.status = 200;
+      ctx.body = { id: id };
+    } else {
+      ctx.status = 500;
+      ctx.body = { err: "delete data failed" };
+    }
   } else {
-    ctx.status = 404;
+    ctx.status = 500;
+    ctx.body = { err: "delete data failed" };
   }
+
+  //   if (id <= articles.length && id > 0) {
+  //     articles.splice(id - 1, 1);
+  //     ctx.body = {
+  //       message: `Removed article with id ${id}`,
+  //     };
+  //   } else {
+  //     ctx.status = 404;
+  //   }
 
   await next();
 };
