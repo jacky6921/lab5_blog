@@ -1,13 +1,13 @@
 import Router, { RouterContext } from "koa-router";
 import bodyParser from "koa-bodyparser";
-import * as model from "../models/articles";
+import * as model from "../models/users";
 import { basicAuth } from "../controllers/auth";
 
-// Since we are handling articles use a URI that begins with an appropriate path
-const router = new Router({ prefix: "/api/v1/articles" });
-// Temporarily define some random articles in an array.
+// Since we are handling users use a URI that begins with an appropriate path
+const router = new Router({ prefix: "/api/v1/users" });
+// Temporarily define some random users in an array.
 // Later this will come from the DB.
-const articles = [
+const users = [
   { title: "hello article", fullText: "some text here to fill the body" },
   {
     title: "another article",
@@ -20,7 +20,7 @@ const articles = [
   { title: "smart campus", fullText: "smart campus is coming to IVE" },
 ];
 
-interface Article {
+interface User {
   title: string;
   alltext: string;
   summary: string;
@@ -31,9 +31,9 @@ interface Article {
 
 // Now we define the handler functions
 const getAll = async (ctx: RouterContext, next: any) => {
-  let articles = await model.getAll();
-  if (articles.length) {
-    ctx.body = articles;
+  let users = await model.getAll();
+  if (users.length) {
+    ctx.body = users;
   } else {
     ctx.body = {};
   }
@@ -41,17 +41,17 @@ const getAll = async (ctx: RouterContext, next: any) => {
 };
 const getById = async (ctx: RouterContext, next: any) => {
   let id = ctx.params.id;
-  let article = await model.getById(id);
+  let user = await model.getById(id);
 
-  if (article.length) {
-    ctx.body = article[0];
+  if (user.length) {
+    ctx.body = user[0];
   } else {
     ctx.status = 404;
   }
   await next();
 };
 
-const createArticle = async (ctx: RouterContext, next: any) => {
+const createUser = async (ctx: RouterContext, next: any) => {
   const body = ctx.request.body;
   let result = await model.add(body);
   if (result.status == 201) {
@@ -63,11 +63,11 @@ const createArticle = async (ctx: RouterContext, next: any) => {
   }
   await next();
 };
-const updateArticle = async (ctx: RouterContext, next: any) => {
+const updateUser = async (ctx: RouterContext, next: any) => {
   let id = ctx.params.id;
-  let article = await model.getById(id);
+  let user = await model.getById(id);
 
-  if (article.length) {
+  if (user.length) {
     const body = ctx.request.body;
     let result = await model.update(id, body);
 
@@ -83,15 +83,15 @@ const updateArticle = async (ctx: RouterContext, next: any) => {
   }
   await next();
 };
-const deleteArticle = async (ctx: RouterContext, next: any) => {
+const deleteUser = async (ctx: RouterContext, next: any) => {
   let id = +ctx.params.id;
-  let article = await model.getById(id);
-  if (article.length) {
+  let user = await model.getById(id);
+  if (user.length) {
     let result = await model.remove(id);
 
     if (result.status == 200) {
       ctx.status = 200;
-      ctx.body = `Removed article with id ${id}`;
+      ctx.body = `Removed user with id ${id}`;
     } else {
       ctx.status = 500;
       ctx.body = { err: "delete data failed" };
@@ -117,9 +117,9 @@ const deleteArticle = async (ctx: RouterContext, next: any) => {
  a named route parameter. Here the name of the parameter will be 'id'
  and we will define the pattern to match at least 1 numeral. */
 router.get("/", basicAuth, getAll);
-router.post("/", bodyParser(), basicAuth, createArticle);
+router.post("/", bodyParser(), basicAuth, createUser);
 router.get("/:id([0-9]{1,})", basicAuth, getById);
-router.put("/:id([0-9]{1,})", bodyParser(), basicAuth, updateArticle);
-router.del("/:id([0-9]{1,})", basicAuth, deleteArticle);
+router.put("/:id([0-9]{1,})", bodyParser(), basicAuth, updateUser);
+router.del("/:id([0-9]{1,})", basicAuth, deleteUser);
 // Finally, define the exported object when import from other scripts.
 export { router };
